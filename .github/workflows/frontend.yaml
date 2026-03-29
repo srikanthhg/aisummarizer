@@ -157,17 +157,17 @@ jobs:
           git add charts/frontend/values.yaml
           git diff --cached --quiet || git commit -m "updated frontend image tag"
           git push
-  create-helm-chart:
-    runs-on: ubuntu-latest
-    needs:
-      - update-image-tag-in-frontend-helm-chart
-    steps:
-      - name: Checkout (noop, keeps workspace consistent)
-        uses: actions/checkout@v6
+#   create-helm-chart:
+#     runs-on: ubuntu-latest
+#     needs:
+#       - update-image-tag-in-frontend-helm-chart
+#     steps:
+#       - name: Checkout (noop, keeps workspace consistent)
+#         uses: actions/checkout@v6
 
-      - name: Create Helm chart package
-        run: |
-          echo ${{ secrets.PAT_TOKEN }} | helm registry login ghcr.io -u USERNAME --password-stdin
-          helm package charts/frontend --destination ./helm-packages
-          ls -la ./helm-packages
-          helm push ./helm-packages/frontend-*.tgz oci://ghcr.io/srikanthhg
+#       - name: Create Helm chart package
+#         run: |
+#           echo ${{ secrets.PAT_TOKEN }} | helm registry login ghcr.io -u USERNAME --password-stdin
+#           helm package charts/frontend --destination ./helm-packages
+#           ls -la ./helm-packages
+#           helm push ./helm-packages/frontend-*.tgz oci://ghcr.io/srikanthhg
