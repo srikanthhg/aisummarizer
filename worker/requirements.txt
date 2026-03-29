@@ -1,9 +1,0 @@
-openai
-redis
-azure-storage-blob
-azure-servicebus
-sqlalchemy
-asyncpg
-azure-identity
-PyPDF2
-python-docx
