@@ -11,7 +11,7 @@ image:
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2e9e1c1d046b7a862581cbe4869f6813a375d0f8"
+  tag: "00a26d9bc0ba91dab207a30317d2aac67513cf32"
 
 config:
   secretsDir: /mnt/secrets
