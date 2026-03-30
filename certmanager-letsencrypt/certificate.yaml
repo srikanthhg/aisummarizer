@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: chat-app-cert
+  namespace: default
+spec:
+  privateKey:
+    rotationPolicy: Always
+  secretName: chat-app-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  dnsNames:
+    - chat.skanth307.shop

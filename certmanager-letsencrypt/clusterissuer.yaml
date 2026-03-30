@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: skanth306@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-production
+    solvers:
+    - dns01:
+        azureDNS:
+          resourceGroupName: myRG
+          subscriptionID: 2cab150b-4433-4b0e-95a8-fabb980b3485
+          hostedZoneName: skanth307.shop
+          environment: AzurePublicCloud   
+          managedIdentity:
+            clientID: 7da70023-fd3f-4bf1-8900-4a5606aa5963

@@ -1,0 +1,32 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: ai-gateway
+  namespace: default
+spec:
+  gatewayClassName: eg
+  infrastructure:
+    labels:
+      app: envoy-gateway
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: chat.skanth307.shop
+      allowedRoutes:
+        namespaces:
+          from: Same # or All or Selector
+
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: chat.skanth307.shop
+      allowedRoutes:
+        namespaces:
+          from: Same # or All or Selector
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: chat-app-tls
+            kind: Secret
+            group: ""

@@ -1,0 +1,66 @@
+helm repo add jetstack https://charts.jetstack.io --force-update
+helm upgrade --install \
+  cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version v1.19.0 \
+  --set crds.enabled=true \
+  --values cert-manager-values.yaml
+---
+# cert-manager-values.yaml
+podLabels:
+  azure.workload.identity/use: "true"
+serviceAccount:
+  labels:
+    azure.workload.identity/use: "true"
+---
+kubectl -n cert-manager get all
+---
+
+DNS zone contributor` role to the managed identity of the AKS cluster
+---
+export SERVICE_ACCOUNT_ISSUER=$(az aks show --resource-group myRG --name myaksCluster-eastus --query "oidcIssuerProfile.issuerUrl" -o tsv)
+az identity federated-credential create \
+  --name "cert-manager" \
+  --identity-name "myManagedIdentity-eastus" \
+  --issuer "${SERVICE_ACCOUNT_ISSUER}" \
+  --subject "system:serviceaccount:cert-manager:cert-manager" \
+  --resource-group myRG
+---
+# clusterissuer-lets-encrypt-production.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: $EMAIL_ADDRESS # skanth306@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-production
+    solvers:
+    - dns01:
+        azureDNS:
+          resourceGroupName: $AZURE_DEFAULTS_GROUP # myRG
+          subscriptionID: $AZURE_SUBSCRIPTION_ID  # 2cab150b-4433-4b0e-95a8-fabb980b3485
+          hostedZoneName: $DOMAIN_NAME    # skanth307.shop
+          environment: AzurePublicCloud   
+          managedIdentity:
+            clientID: $USER_ASSIGNED_IDENTITY_CLIENT_ID   #7da70023-fd3f-4bf1-8900-4a5606aa5963
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: chat-app-cert
+  namespace: default
+spec:
+  privateKey:
+    rotationPolicy: Always
+  secretName: letsencrypt-production
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  dnsNames:
+    # - "*.skanth306.shop"
+    - chat.skanth306.shop
+    
