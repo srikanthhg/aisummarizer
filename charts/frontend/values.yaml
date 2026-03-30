@@ -18,6 +18,7 @@ service:
   port: 80
   targetPort: 8000
 
+
 config:
   backendUrl: http://backend:8000
 
