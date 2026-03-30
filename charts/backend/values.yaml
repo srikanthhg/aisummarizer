@@ -22,13 +22,13 @@ config:
   secretsDir: /mnt/secrets
 
   azureStorageAuthMode: connection_string # managed_identity or connection_string
-  azureStorageAccountUrl: "https://aisummarizerstracc.blob.core.windows.net/"
-  blobContainerName: "ai-summarizer-con"
+  azureStorageAccountUrl: "https://aisummarizer001.blob.core.windows.net/"
+  blobContainerName: "aisummarizercon001"
 
   serviceBusAuthMode: connection_string # managed_identity or connection_string
-  serviceBusFullyQualifiedNamespace: "ai-summarizer.servicebus.windows.net"
+  serviceBusFullyQualifiedNamespace: "aisummarizertest001.servicebus.windows.net"
   # serviceBusConnectionString: ""
-  serviceBusQueueName: "ai-summarizer-queue"
+  serviceBusQueueName: "aisummarizerqueue"
 
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
