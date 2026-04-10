@@ -3,9 +3,24 @@ kind: Application
 metadata:
   name: frontend
   namespace: argocd
+  finalizers:
+  - resource-finalizer.argocd.argoproj.io
 spec:
+  ignoreDifferences:
+  - group: apps
+    kind: Deployment
+    jsonPointers:
+    - /spec/replicas
+  - group: apps
+    kind: Statefulset
+    jsonPointers:
+    - /spec/replicas 
   project: default
   source:
+    helm:
+    parameters:
+    - name: "Replicas"
+      value: 0
     repoURL: https://github.com/srikanthhg/aisummarizer.git
     targetRevision: main
     path: charts/frontend
