@@ -19,7 +19,7 @@ spec:
   source:
     helm:
     parameters:
-    - name: "Replicas"
+    - name: "replicaCount"
       value: 0
     repoURL: https://github.com/srikanthhg/aisummarizer.git
     targetRevision: main
