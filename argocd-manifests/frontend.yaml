@@ -19,8 +19,6 @@ spec:
   source:
     helm:
       parameters:
-      - name: replicaCount
-        value: "1"
     repoURL: https://github.com/srikanthhg/aisummarizer.git
     targetRevision: main
     path: charts/frontend
