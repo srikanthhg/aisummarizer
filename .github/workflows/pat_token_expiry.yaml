@@ -1,0 +1,82 @@
+name: GitHub PAT Expiry Check
+
+on:
+  schedule:
+    # Run every day at 9:00 AM IST
+    # 9:00 AM IST = 3:30 AM UTC
+    - cron: "30 3 * * *"
+
+  workflow_dispatch:
+
+jobs:
+  check-pat-expiry:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PAT expiration
+        id: pat-expiry
+        env:
+          GH_PAT: ${{ secrets.PAT_TOKEN }}
+        run: |
+          set -e
+
+          echo "Checking GitHub PAT expiration..."
+
+          RESPONSE_HEADERS=$(mktemp)
+
+          HTTP_STATUS=$(curl \
+            --silent \
+            --show-error \
+            --output /dev/null \
+            --dump-header "$RESPONSE_HEADERS" \
+            --write-out "%{http_code}" \
+            --request GET \
+            --header "Authorization: Bearer ${GH_PAT}" \
+            --header "Accept: application/vnd.github+json" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/user)
+
+          echo "GitHub API HTTP status: ${HTTP_STATUS}"
+
+          if [ "${HTTP_STATUS}" != "200" ]; then
+            echo "ERROR: GitHub API authentication failed."
+            echo "The PAT may be invalid, revoked, or expired."
+            exit 1
+          fi
+
+          EXPIRATION=$(grep -i "^github-authentication-token-expiration:" "$RESPONSE_HEADERS" \
+            | sed 's/^[^:]*:[[:space:]]*//' \
+            | tr -d '\r')
+
+          if [ -z "${EXPIRATION}" ]; then
+            echo "ERROR: Could not determine PAT expiration."
+            echo "Make sure this is a supported PAT type."
+            exit 1
+          fi
+
+          echo "PAT expiration: ${EXPIRATION}"
+
+          EXPIRATION_SECONDS=$(date -d "${EXPIRATION}" +%s)
+          CURRENT_SECONDS=$(date -u +%s)
+
+          SECONDS_LEFT=$((EXPIRATION_SECONDS - CURRENT_SECONDS))
+          DAYS_LEFT=$((SECONDS_LEFT / 86400))
+
+          echo "Days remaining: ${DAYS_LEFT}"
+
+          echo "expiration=${EXPIRATION}" >> "$GITHUB_OUTPUT"
+          echo "days_left=${DAYS_LEFT}" >> "$GITHUB_OUTPUT"
+
+      - name: Send notification
+        if: steps.pat-expiry.outputs.days_left <= 5
+        env:
+          EXPIRATION: ${{ steps.pat-expiry.outputs.expiration }}
+          DAYS_LEFT: ${{ steps.pat-expiry.outputs.days_left }}
+        run: |
+          echo "======================================"
+          echo "WARNING: GitHub PAT is expiring soon"
+          echo "Expiration : ${EXPIRATION}"
+          echo "Days left  : ${DAYS_LEFT}"
+          echo "======================================"
+
+          # Add your Teams/Slack/email notification here.
